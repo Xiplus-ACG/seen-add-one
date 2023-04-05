@@ -1,0 +1,30 @@
+name: Deploy to MediaWiki
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: xiplus-mediawiki-programs/deploy-mediawiki/.github/actions/setup@main
+        with:
+          username: ${{ secrets.USER_NAME }}
+          botname: ${{ secrets.BOT_NAME }}
+          password: ${{ secrets.BOT_PASS }}
+          url: ${{ secrets.ACG_URL }}
+
+      - name: Get short sha
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - uses: xiplus-mediawiki-programs/deploy-mediawiki/.github/actions/deploy@main
+        with:
+          src: seen-add-one.js
+          dst: User:Xiplus/seen-add-one.js
+          summary: "${{ steps.vars.outputs.sha_short }} ${{ github.event.head_commit.message }}"
