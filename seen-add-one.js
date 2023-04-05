@@ -1,13 +1,16 @@
 (function() {
 
     function seenAddOne() {
+        var btn = this;
+        $(btn).prop('disabled', true);
+
         var api = new mw.Api();
         api.get({
             'action': 'wbgetclaims',
             'format': 'json',
             'entity': mw.config.get('wgTitle'),
             'property': 'P28'
-        }).then(function(data) {
+        }).done(function(data) {
             var guid = data['claims']['P28'][0]['id'];
             var oldvalue = parseInt(data['claims']['P28'][0]['mainsnak']['datavalue']['value']['amount']);
             var newvalue = oldvalue + 1;
@@ -33,17 +36,17 @@
                 mw.notify('未知錯誤：' + e);
             });
 
-        }, function(e) {
+        }).fail(function(e) {
             mw.notify('未知錯誤：' + e);
+        }).always(function() {
+            $(btn).prop('disabled', false);
         });
-
     }
 
     if ($('#P28 .wikibase-statementview-mainsnak .wikibase-snakview-value').text() != $('#P27 .wikibase-statementview-mainsnak .wikibase-snakview-value').text()) {
         $('<button style="margin-left: 10px;">+1</button>')
             .on('click', seenAddOne)
             .appendTo($('div#P28 div.wikibase-statementview-mainsnak div.wikibase-snakview-body'));
-
     }
 
 }
